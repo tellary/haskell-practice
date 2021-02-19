@@ -16,8 +16,8 @@ Collecting type info for 1 module(s) ...
 λ> e = encodeBS f
 (0.02 secs, 0 bytes)
 λ> S.length . encodedData $ e
-1849068
-(5.76 secs, 12,210,660,272 bytes)
+1812385
+(5.71 secs, 12,075,504,016 bytes)
 ```
 
 However, it took 5.76 seconds, and 12 billion bytes were garbage collected along the way.
@@ -28,9 +28,8 @@ Decoding also works, but it's similarly ineffective:
 
 ```haskell
 λ> S.length . decodeBS $ e
-2575373
-(4.64 secs, 6,169,753,368 bytes)
+2575684
+(4.32 secs, 6,056,021,200 bytes)
 λ> f == decodeBS e
 True
-(4.63 secs, 6,169,754,240 bytes)
 ```

@@ -7,14 +7,22 @@ import qualified Data.Map        as M
 import qualified Data.PQueue.Min as P
 import           Data.Tuple      (swap)
 import           Data.Word       (Word8)
+import Data.Function (on)
 
 data Node a
   = Leaf Double a
   | Node Double (Node a) (Node a)
-  deriving (Show, Eq, Ord)
+  deriving Show
+
 
 nodeWeight (Leaf w _  ) = w
 nodeWeight (Node w _ _) = w
+
+instance Ord (Node a) where
+  compare = compare `on` nodeWeight
+
+instance Eq (Node a) where
+  (==) = (==) `on` nodeWeight
 
 instance Semigroup (Node a) where
   l1 <> l2
