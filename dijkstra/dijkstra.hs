@@ -39,20 +39,23 @@ instance Eq e => Eq (Path e v) where
   (==) = (==) `on` pathValue
 
 dijkstra :: (Monoid e, Ord e, Ord v) => Node e v -> M.Map (Node e v) (Path e v)
-dijkstra start = loop q M.empty
-  where q = P.singleton . newPath $ start
-        loop q r
-          = case P.splitAt 1 q of
-              ([p], q')
-                | M.member (pathHead p) r -> loop q' r
-                | otherwise
-                  -> loop (updateNeighborPaths q' p)
-                          (M.insert (pathHead p) p r)
-              ([] , _ ) -> r
-              _         -> error "splitAt 1"
-        updateNeighborPaths q p
-          = foldr P.insert q paths
+dijkstra start = extendBoundary queue tree
+  where startPath = newPath $ start
+        queue     = P.singleton startPath
+        tree      = M.singleton start startPath
+        extendBoundary q t
+          = case P.minView q of
+              Just (p, q') -> let (q'', t') = addNeighbors q' t p
+                              in extendBoundary q'' t'
+              Nothing      -> t
+        addNeighbors q t p
+          = foldr insertIfBetter (q, t) paths
           where paths = map (`addTo` p) . nodeEdges . pathHead $ p
+                insertIfBetter p (q, t)
+                  = case M.lookup (pathHead p) t of
+                      Just p0 | pathValue p >= pathValue p0
+                        -> (q ,t)
+                      _ -> (P.insert p q, M.insert (pathHead p) p t)
 
 valueMap :: Ord v => M.Map (Node e v) (Path e v) -> M.Map v (e, [v])
 valueMap
